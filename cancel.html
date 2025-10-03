@@ -161,6 +161,10 @@
     const messageDiv = document.getElementById('message');
     const cancelBtn = document.getElementById('cancelBtn');
 
+    console.log('キャンセル処理開始');
+    console.log('予約番号:', bookingId);
+    console.log('電話番号:', phone);
+
     if (!bookingId || !phone) {
         showMessage('予約番号と電話番号を入力してください', 'error');
         return;
@@ -172,24 +176,29 @@
 
     try {
         const url = `${API_ENDPOINT}?action=cancel&bookingId=${encodeURIComponent(bookingId)}&phone=${encodeURIComponent(phone)}`;
+        console.log('リクエストURL:', url);
         
         const response = await fetch(url, {
             method: 'GET'
         });
         
+        console.log('レスポンス受信:', response.status);
+        
         const result = await response.json();
+        console.log('レスポンスデータ:', result);
         
         if (result.success) {
+            console.log('キャンセル成功');
             showMessage(result.message, 'success');
-            // フォームをクリア
             document.getElementById('bookingId').value = '';
             document.getElementById('phone').value = '';
         } else {
+            console.log('キャンセル失敗');
             showMessage(result.message || 'キャンセルに失敗しました', 'error');
         }
 
     } catch (error) {
-        console.error('エラー:', error);
+        console.error('エラー発生:', error);
         showMessage('キャンセル処理に失敗しました。もう一度お試しください。', 'error');
     } finally {
         cancelBtn.disabled = false;
