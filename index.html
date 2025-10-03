@@ -919,18 +919,23 @@ try {
     console.log('予約チェックエラー:', error);
 }
     
-    times.forEach(time => {
-        const slot = document.createElement('div');
-        slot.className = 'time-slot';
-        slot.textContent = time;
-        
-        // 予約済みの時間は無効化
-        if (bookedTimes.includes(time)) {
-            slot.classList.add('disabled');
-            slot.textContent += ' ×';
-        } else {
-            slot.onclick = () => selectTime(time, slot);
-        }
+   times.forEach(time => {
+    const slot = document.createElement('div');
+    slot.className = 'time-slot';
+    slot.textContent = time;
+    
+    // 現在時刻との比較（過去の時間を無効化）
+    const now = new Date();
+    const selectedDateTime = new Date(`${bookingData.date}T${time}:00+09:00`);
+    const isPast = selectedDateTime < now;
+    
+    // 予約済みまたは過去の時間は無効化
+    if (bookedTimes.includes(time) || isPast) {
+        slot.classList.add('disabled');
+        slot.textContent += ' ×';
+    } else {
+        slot.onclick = () => selectTime(time, slot);
+    }
         
         if (bookingData.time === time) {
             slot.classList.add('selected');
