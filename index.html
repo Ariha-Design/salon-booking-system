@@ -1,4 +1,4 @@
-index.html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -875,8 +875,11 @@ index.html<!DOCTYPE html>
 
         function selectDate(year, month, day) {
             selectedDate = new Date(year, month, day);
-            bookingData.date = selectedDate;
+        // YYYY-MM-DD形式の文字列として保存
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            bookingData.date = dateStr;
             bookingData.time = null;
+            
             
             renderCalendar();
             
@@ -941,7 +944,7 @@ index.html<!DOCTYPE html>
         async function completeBooking() {
             try {
                 const payload = {
-                    date: bookingData.date.toISOString().split('T')[0],
+                    date: bookingData.date,
                     time: bookingData.time,
                     name: bookingData.name,
                     phone: bookingData.phone,
