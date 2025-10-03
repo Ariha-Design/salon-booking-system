@@ -890,35 +890,47 @@
             showTimeSlots();
         }
 
-        function showTimeSlots() {
-            document.getElementById('timeSlotsContainer').style.display = 'block';
-            const container = document.getElementById('timeSlots');
-            container.innerHTML = '';
-            
-            const times = ['10:00', '10:30', '11:00', '11:30', '13:00', '13:30', 
-                          '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', 
-                          '17:00', '17:30', '18:00', '18:30', '19:00'];
-            
-            times.forEach(time => {
-                const slot = document.createElement('div');
-                slot.className = 'time-slot';
-                slot.textContent = time;
-                
-                const random = Math.random();
-                if (random > 0.7) {
-                    slot.classList.add('disabled');
-                    slot.textContent += ' ×';
-                } else {
-                    slot.onclick = () => selectTime(time, slot);
-                }
-                
-                if (bookingData.time === time) {
-                    slot.classList.add('selected');
-                }
-                
-                container.appendChild(slot);
-            });
+        async function showTimeSlots() {
+    document.getElementById('timeSlotsContainer').style.display = 'block';
+    const container = document.getElementById('timeSlots');
+    container.innerHTML = '';
+    
+    const times = ['10:00', '10:30', '11:00', '11:30', '13:00', '13:30', 
+                  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', 
+                  '17:00', '17:30', '18:00', '18:30', '19:00'];
+    
+    // 予約済み時間を取得
+    let bookedTimes = [];
+    try {
+        const response = await fetch(`${API_ENDPOINT}?date=${bookingData.date}&staff=${bookingData.staffName || ''}`);
+        const data = await response.json();
+        if (data.success) {
+            bookedTimes = data.bookedTimes || [];
         }
+    } catch (error) {
+        console.log('予約チェックエラー:', error);
+    }
+    
+    times.forEach(time => {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.textContent = time;
+        
+        // 予約済みの時間は無効化
+        if (bookedTimes.includes(time)) {
+            slot.classList.add('disabled');
+            slot.textContent += ' ×';
+        } else {
+            slot.onclick = () => selectTime(time, slot);
+        }
+        
+        if (bookingData.time === time) {
+            slot.classList.add('selected');
+        }
+        
+        container.appendChild(slot);
+    });
+}
 
         function selectTime(time, element) {
             document.querySelectorAll('.time-slot').forEach(slot => {
