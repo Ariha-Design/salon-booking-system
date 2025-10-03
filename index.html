@@ -900,16 +900,24 @@
                   '17:00', '17:30', '18:00', '18:30', '19:00'];
     
     // 予約済み時間を取得
-    let bookedTimes = [];
-    try {
-        const response = await fetch(`${API_ENDPOINT}?date=${bookingData.date}&staff=${bookingData.staffName || ''}`);
-        const data = await response.json();
-        if (data.success) {
-            bookedTimes = data.bookedTimes || [];
-        }
-    } catch (error) {
-        console.log('予約チェックエラー:', error);
+let bookedTimes = [];
+try {
+    const url = `${API_ENDPOINT}?date=${bookingData.date}&staff=${bookingData.staffName || ''}`;
+    console.log('リクエストURL:', url);
+    
+    const response = await fetch(url);
+    console.log('レスポンスステータス:', response.status);
+    
+    const data = await response.json();
+    console.log('レスポンスデータ:', data);
+    
+    if (data.success) {
+        bookedTimes = data.bookedTimes || [];
+        console.log('予約済み時間:', bookedTimes);
     }
+} catch (error) {
+    console.log('予約チェックエラー:', error);
+}
     
     times.forEach(time => {
         const slot = document.createElement('div');
