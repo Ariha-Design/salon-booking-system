@@ -929,17 +929,18 @@
         }
 
         function updateSummary() {
-            document.getElementById('summaryStaff').textContent = bookingData.staffName;
-            document.getElementById('summaryMenu').textContent = bookingData.menuName;
-            
-            const dateStr = bookingData.date ? 
-                `${bookingData.date.getFullYear()}年${bookingData.date.getMonth() + 1}月${bookingData.date.getDate()}日 ${bookingData.time}` : '-';
-            document.getElementById('summaryDate').textContent = dateStr;
-            document.getElementById('summaryDuration').textContent = `約${bookingData.duration}分`;
-            document.getElementById('summaryPrice').textContent = `¥${bookingData.price.toLocaleString()}`;
-            document.getElementById('summaryName').textContent = bookingData.name;
-            document.getElementById('summaryPhone').textContent = bookingData.phone;
-        }
+    document.getElementById('summaryStaff').textContent = bookingData.staffName;
+    document.getElementById('summaryMenu').textContent = bookingData.menuName;
+    
+    const dateStr = bookingData.date && bookingData.time ? 
+        `${bookingData.date} ${bookingData.time}` : '-';
+    document.getElementById('summaryDate').textContent = dateStr;
+    document.getElementById('summaryDuration').textContent = `約${bookingData.duration}分`;
+    document.getElementById('summaryPrice').textContent = `¥${bookingData.price.toLocaleString()}`;
+    document.getElementById('summaryName').textContent = bookingData.name;
+    document.getElementById('summaryPhone').textContent = bookingData.phone;
+}
+        
 
         async function completeBooking() {
             try {
