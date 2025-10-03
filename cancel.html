@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約キャンセル</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-cancel:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #92400e;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>予約キャンセル</h1>
+        <p class="subtitle">予約番号と電話番号を入力してください</p>
+
+        <div class="warning">
+            ⚠️ キャンセル後の復元はできません。よくご確認の上、手続きを進めてください。
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">予約番号 *</label>
+            <input type="text" class="form-input" id="bookingId" placeholder="B12345678">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">電話番号 *</label>
+            <input type="tel" class="form-input" id="phone" placeholder="090-1234-5678">
+        </div>
+
+        <button class="btn btn-cancel" id="cancelBtn" onclick="cancelBooking()">予約をキャンセルする</button>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwdNckcNFuxuSyFt4Yc7BIaSJ4tUIDD5xIBtKXz8e48BXow3GFLLlMbHgAuYbRWCpMSYw/exec';  // ← Google Apps ScriptのURLを入れる
+
+        async function cancelBooking() {
+            const bookingId = document.getElementById('bookingId').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const messageDiv = document.getElementById('message');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            if (!bookingId || !phone) {
+                showMessage('予約番号と電話番号を入力してください', 'error');
+                return;
+            }
+
+            // ボタン無効化
+            cancelBtn.disabled = true;
+            cancelBtn.textContent = '処理中...';
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'cancel',
+                        bookingId: bookingId,
+                        phone: phone
+                    }),
+                    mode: 'no-cors'
+                });
+
+                // no-corsモードでは詳細なレスポンスが取得できないため、
+                // 成功と仮定してメッセージを表示
+                showMessage('キャンセルリクエストを送信しました。確認メッセージをお待ちください。', 'success');
+                
+                // フォームをクリア
+                document.getElementById('bookingId').value = '';
+                document.getElementById('phone').value = '';
+
+            } catch (error) {
+                console.error('エラー:', error);
+                showMessage('キャンセル処理に失敗しました。もう一度お試しください。', 'error');
+            } finally {
+                cancelBtn.disabled = false;
+                cancelBtn.textContent = '予約をキャンセルする';
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
