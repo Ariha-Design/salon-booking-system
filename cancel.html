@@ -156,50 +156,46 @@
         const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwdNckcNFuxuSyFt4Yc7BIaSJ4tUIDD5xIBtKXz8e48BXow3GFLLlMbHgAuYbRWCpMSYw/exec';  // ← Google Apps ScriptのURLを入れる
 
         async function cancelBooking() {
-            const bookingId = document.getElementById('bookingId').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const messageDiv = document.getElementById('message');
-            const cancelBtn = document.getElementById('cancelBtn');
+    const bookingId = document.getElementById('bookingId').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const messageDiv = document.getElementById('message');
+    const cancelBtn = document.getElementById('cancelBtn');
 
-            if (!bookingId || !phone) {
-                showMessage('予約番号と電話番号を入力してください', 'error');
-                return;
-            }
+    if (!bookingId || !phone) {
+        showMessage('予約番号と電話番号を入力してください', 'error');
+        return;
+    }
 
-            // ボタン無効化
-            cancelBtn.disabled = true;
-            cancelBtn.textContent = '処理中...';
+    // ボタン無効化
+    cancelBtn.disabled = true;
+    cancelBtn.textContent = '処理中...';
 
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'cancel',
-                        bookingId: bookingId,
-                        phone: phone
-                    }),
-                    mode: 'no-cors'
-                });
-
-                // no-corsモードでは詳細なレスポンスが取得できないため、
-                // 成功と仮定してメッセージを表示
-                showMessage('キャンセルリクエストを送信しました。確認メッセージをお待ちください。', 'success');
-                
-                // フォームをクリア
-                document.getElementById('bookingId').value = '';
-                document.getElementById('phone').value = '';
-
-            } catch (error) {
-                console.error('エラー:', error);
-                showMessage('キャンセル処理に失敗しました。もう一度お試しください。', 'error');
-            } finally {
-                cancelBtn.disabled = false;
-                cancelBtn.textContent = '予約をキャンセルする';
-            }
+    try {
+        const url = `${API_ENDPOINT}?action=cancel&bookingId=${encodeURIComponent(bookingId)}&phone=${encodeURIComponent(phone)}`;
+        
+        const response = await fetch(url, {
+            method: 'GET'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showMessage(result.message, 'success');
+            // フォームをクリア
+            document.getElementById('bookingId').value = '';
+            document.getElementById('phone').value = '';
+        } else {
+            showMessage(result.message || 'キャンセルに失敗しました', 'error');
         }
+
+    } catch (error) {
+        console.error('エラー:', error);
+        showMessage('キャンセル処理に失敗しました。もう一度お試しください。', 'error');
+    } finally {
+        cancelBtn.disabled = false;
+        cancelBtn.textContent = '予約をキャンセルする';
+    }
+}
 
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
